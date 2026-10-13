@@ -1,0 +1,212 @@
+/* ---------- Registration / enquiry ---------- */
+.register {
+  background: var(--bg);
+}
+.register__grid {
+  display: grid;
+  gap: var(--s-3);
+}
+@media (min-width: 960px) {
+  .register__grid {
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    align-items: stretch;
+  }
+}
+.register__panel {
+  padding: clamp(20px, 3vw, 32px);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.register__fields {
+  display: grid;
+  gap: var(--s-4);
+}
+@media (min-width: 600px) {
+  .register__fields {
+    grid-template-columns: 1fr 1fr;
+  }
+  .register__wide {
+    grid-column: 1 / -1;
+  }
+}
+.field {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+.field__label {
+  font-weight: 600;
+  font-size: 0.94rem;
+  color: var(--ink);
+}
+.field__req {
+  color: var(--danger);
+}
+.field__opt {
+  font-weight: 400;
+  color: var(--muted);
+}
+.field__hint {
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+.field__error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--danger);
+}
+.field__error svg {
+  flex: none;
+}
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  font-size: 0.94rem;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.check input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 4px 0 0;
+  accent-color: var(--brand-ink);
+}
+.register__submit {
+  margin-top: var(--s-5);
+}
+@media (max-width: 599px) {
+  .register__submit {
+    width: 100%;
+  }
+}
+
+/* Success state */
+.register__done {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-2);
+  animation: rise-in 0.6s var(--ease) both;
+}
+.register__done:focus {
+  outline: none;
+}
+.register__done h3 {
+  font-size: 1.5rem;
+}
+.register__done-icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  margin-bottom: var(--s-1);
+  border-radius: 50%;
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+.register__notice {
+  display: flex;
+  gap: var(--s-2);
+  margin-block: var(--s-2) var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--radius);
+  border: 1px dashed var(--brand-line);
+  background: var(--bg);
+  font-size: 0.92rem;
+  color: var(--ink-2);
+}
+.register__notice svg {
+  flex: none;
+  margin-top: 4px;
+  color: var(--brand-ink);
+}
+
+/* Contact card: dark, as the AMRUT highlight card */
+.register__contact {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: clamp(20px, 3vw, 32px);
+  border-radius: var(--radius-lg);
+  background: var(--ink);
+  color: var(--night-muted);
+}
+.register__contact::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 320px;
+  height: 320px;
+  right: -130px;
+  bottom: -170px;
+  border-radius: 50%;
+  border: 1.5px dashed hsl(22 72% 52% / 0.5);
+  box-shadow: 0 0 0 46px hsl(22 72% 52% / 0.06), 0 0 0 92px hsl(22 72% 52% / 0.04);
+}
+.register__contact-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin-bottom: var(--s-4);
+  border-radius: 50%;
+  background: var(--brand-ink);
+  color: #fff;
+}
+.register__contact h3 {
+  font-size: 1.32rem;
+  color: #fff;
+}
+.register__contact-desc {
+  margin-top: var(--s-1);
+  font-size: 0.97rem;
+}
+.register__phone {
+  margin-top: var(--s-4);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 1.3rem + 0.8vw, 1.9rem);
+  line-height: 1.2;
+  color: #fff;
+  text-decoration: none;
+}
+.register__phone:hover {
+  color: hsl(30 90% 80%);
+}
+.register__list {
+  display: grid;
+  gap: var(--s-3);
+  align-self: stretch;
+  margin-top: var(--s-5);
+  padding-top: var(--s-5);
+  border-top: 1px solid hsl(30 20% 90% / 0.14);
+  font-size: 0.94rem;
+}
+.register__list li {
+  display: flex;
+  gap: var(--s-3);
+  line-height: 1.5;
+}
+.register__list svg {
+  flex: none;
+  margin-top: 3px;
+  color: hsl(30 80% 78%);
+}
+.register__list a {
+  color: var(--night-ink);
+  overflow-wrap: anywhere;
+}
+.register__list a:hover {
+  color: hsl(30 90% 80%);
+}

@@ -1,0 +1,109 @@
+/* ---------- Participation: who can apply + three steps ---------- */
+.participate {
+  background: var(--surface);
+}
+.participate__grid {
+  display: grid;
+  gap: var(--s-8);
+  align-items: center;
+}
+@media (min-width: 920px) {
+  .participate__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(40px, 5vw, 64px);
+  }
+}
+.participate__who {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: var(--s-5);
+}
+.participate__who li {
+  padding: 3px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink-2);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.participate__cta {
+  margin-top: var(--s-6);
+}
+
+/* Step path (same treatment as the AMRUT question path) */
+.steps {
+  position: relative;
+  display: grid;
+  gap: var(--s-1);
+  padding: var(--card-pad);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+.steps::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--card-pad) + 19px);
+  top: calc(var(--card-pad) + 28px);
+  bottom: calc(var(--card-pad) + 28px);
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(var(--brand), var(--brand-line));
+  transform: scaleY(0);
+  transform-origin: top;
+}
+[data-visible].steps::before {
+  animation: grow-y 1.2s var(--ease) both 0.2s;
+}
+.steps__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: var(--s-4);
+  padding: 12px 12px 12px 0;
+  border-radius: 14px;
+  transition: background-color 0.3s;
+}
+.steps__item:hover {
+  background: linear-gradient(90deg, transparent 0 20px, var(--surface) 20px);
+}
+.steps__node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--brand-line);
+  background: var(--surface);
+  color: var(--brand-ink);
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+[data-visible] .steps__node {
+  animation: fade-in 0.5s ease both;
+  animation-delay: calc(var(--i) * 140ms + 250ms);
+}
+.steps__item:hover .steps__node {
+  background: var(--brand-ink);
+  border-color: var(--brand-ink);
+  color: #fff;
+}
+.steps__n {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brand-ink);
+}
+.steps__title {
+  margin-top: 2px;
+  font-size: 1.16rem;
+}
+.steps__desc {
+  margin-top: 2px;
+  font-size: 0.97rem;
+  color: var(--ink-2);
+}

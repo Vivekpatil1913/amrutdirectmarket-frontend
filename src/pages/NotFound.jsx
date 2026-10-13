@@ -1,26 +1,30 @@
 import { Link } from 'react-router-dom'
+import Icon from '../components/ui/Icon'
+import Mandala from '../components/ui/Mandala'
+import { useLanguage } from '../i18n/LanguageContext'
+import photo from '../assets/market-produce.jpg'
 
 export default function NotFound() {
+  const { t, num } = useLanguage()
   return (
-    <div style={{
-      minHeight: '70vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexDirection: 'column',
-      gap: 'var(--sp-5)',
-      textAlign: 'center',
-      padding: 'var(--sp-8)',
-    }}>
-      <div style={{fontSize:'5rem'}}>🏟️</div>
-      <h1 style={{fontSize:'clamp(var(--text-3xl), 5vw, var(--text-5xl))'}}>Page Not Found</h1>
-      <p style={{fontSize:'var(--text-lg)', color:'var(--muted)', maxWidth:'40ch', lineHeight:1.7}}>
-        The page you're looking for doesn't exist or may have been moved.
-      </p>
-      <div style={{display:'flex', gap:'var(--sp-4)', flexWrap:'wrap', justifyContent:'center'}}>
-        <Link to="/" className="btn btn--primary">Go Home</Link>
-        <Link to="/exhibitions" className="btn btn--outline">View Exhibitions</Link>
+    <section className="standalone">
+      <Mandala className="standalone__mandala" />
+      <div className="standalone__card">
+        <div className="standalone__media">
+          <img src={photo} alt="" width="1100" height="733" />
+        </div>
+        <div className="standalone__body">
+          <p className="standalone__code">{num(404)}</p>
+          <h1 className="standalone__title">{t.notFound.title}</h1>
+          <p className="standalone__desc">{t.notFound.desc}</p>
+          <div className="standalone__actions">
+            <Link to="/" className="btn btn--primary">
+              {t.notFound.home}
+              <Icon name="arrowRight" size={16} />
+            </Link>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   )
 }

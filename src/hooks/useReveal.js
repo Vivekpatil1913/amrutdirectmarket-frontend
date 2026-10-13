@@ -1,26 +1,30 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 
-export function useReveal() {
-  const ref = useRef(null)
-
+// Marks every `[data-reveal]` element with `data-visible` once it scrolls into
+// view. An attribute is used rather than a class because React owns
+// `className`: a re-render that changes an element's class would wipe a class
+// added here and hide the element again.
+export function useReveal(deps = []) {
   useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const observer = new IntersectionObserver(
+    const nodes = document.querySelectorAll('[data-reveal]:not([data-visible])')
+    const show = el => el.setAttribute('data-visible', '')
+    if (!('IntersectionObserver' in window)) {
+      nodes.forEach(show)
+      return undefined
+    }
+    const io = new IntersectionObserver(
       entries => {
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            e.target.classList.add('visible')
-            observer.unobserve(e.target)
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            show(entry.target)
+            io.unobserve(entry.target)
           }
         })
       },
-      { threshold: 0.12 }
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.08 }
     )
-    const items = el.querySelectorAll('.reveal')
-    items.forEach(item => observer.observe(item))
-    return () => observer.disconnect()
-  }, [])
-
-  return ref
+    nodes.forEach(n => io.observe(n))
+    return () => io.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps)
 }

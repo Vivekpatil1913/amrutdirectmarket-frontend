@@ -1,30 +1,28 @@
-import { Routes, Route } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import Home from './pages/Home'
-import About from './pages/About'
-import Exhibitions from './pages/Exhibitions'
-import ExhibitionDetail from './pages/ExhibitionDetail'
-import StallBooking from './pages/StallBooking'
-import Categories from './pages/Categories'
-import Gallery from './pages/Gallery'
-import Beneficiaries from './pages/Beneficiaries'
-import Contact from './pages/Contact'
 import NotFound from './pages/NotFound'
+
+// The public site is a single page. Former page URLs land on the matching
+// home-page section so existing links and bookmarks keep working.
+const LEGACY = [
+  ['about', 'about'],
+  ['categories', 'about'],
+  ['exhibitions/*', 'participate'],
+  ['stall-booking/*', 'register'],
+  ['beneficiaries', 'highlights'],
+  ['gallery', 'home'],
+  ['contact', 'register'],
+]
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
-        <Route path="about" element={<About />} />
-        <Route path="exhibitions" element={<Exhibitions />} />
-        <Route path="exhibitions/:id" element={<ExhibitionDetail />} />
-        <Route path="stall-booking" element={<StallBooking />} />
-        <Route path="stall-booking/:exhibitionId" element={<StallBooking />} />
-        <Route path="categories" element={<Categories />} />
-        <Route path="gallery" element={<Gallery />} />
-        <Route path="beneficiaries" element={<Beneficiaries />} />
-        <Route path="contact" element={<Contact />} />
+        {LEGACY.map(([path, section]) => (
+          <Route key={path} path={path} element={<Navigate to={{ pathname: '/', hash: `#${section}` }} replace />} />
+        ))}
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
