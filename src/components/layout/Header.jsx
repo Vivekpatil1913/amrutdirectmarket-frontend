@@ -2,8 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Icon from '../ui/Icon'
 import LanguageSwitch from './LanguageSwitch'
-import logo from '../../assets/amrut-logo.png'
-import { CONTACT, NAV_ITEMS } from '../../data/site'
+import { useCollection, useSection } from '../../content/SiteContent'
+import { mediaUrl } from '../../services/config'
 import { useLanguage } from '../../i18n/LanguageContext'
 import './Header.css'
 
@@ -36,6 +36,10 @@ export function useSectionNav() {
 
 export default function Header() {
   const { t } = useLanguage()
+  const settings = useSection('settings')
+  const contact = useSection('contact')
+  const navItems = useCollection('navItems').filter(n => n.show_in_header)
+  const navIds = navItems.map(n => n.section).join(',')
   const goTo = useSectionNav()
   const { pathname } = useLocation()
   const [open, setOpen] = useState(false)
@@ -75,7 +79,7 @@ export default function Header() {
     const ro = new ResizeObserver(place)
     ro.observe(list)
     return () => ro.disconnect()
-  }, [activeId, t])
+  }, [activeId, t, navIds])
 
   // Highlight the nav item for the section currently in view.
   useEffect(() => {
@@ -84,12 +88,12 @@ export default function Header() {
       entries => entries.forEach(e => e.isIntersecting && setActive(e.target.id)),
       { rootMargin: '-45% 0px -50% 0px' }
     )
-    NAV_ITEMS.forEach(({ id }) => {
-      const el = document.getElementById(id)
+    navIds.split(',').forEach(id => {
+      const el = id && document.getElementById(id)
       if (el) io.observe(el)
     })
     return () => io.disconnect()
-  }, [onHome])
+  }, [onHome, navIds])
 
   useEffect(() => {
     if (!open) return undefined
@@ -125,18 +129,20 @@ export default function Header() {
       <div className="govbar">
         <div className="container govbar__inner">
           <p className="govbar__id">
-            <span className="govbar__state">{t.gov.state}</span>
-            <span className="govbar__sep" aria-hidden="true" />
-            <span className="govbar__org">{t.gov.org}</span>
+            <span className="govbar__state">{settings.gov_state}</span>
+            {settings.gov_org && <span className="govbar__sep" aria-hidden="true" />}
+            <span className="govbar__org">{settings.gov_org}</span>
           </p>
           <div className="govbar__tools">
-            <p className="govbar__preview" title={t.preview.banner}>
-              <Icon name="info" size={14} />
-              <span className="govbar__preview-long">{t.preview.banner}</span>
-              <span className="govbar__preview-short" aria-hidden="true">
-                {t.preview.short}
-              </span>
-            </p>
+            {settings.notice_enabled && settings.notice_text && (
+              <p className="govbar__preview" title={settings.notice_text}>
+                <Icon name="info" size={14} />
+                <span className="govbar__preview-long">{settings.notice_text}</span>
+                <span className="govbar__preview-short" aria-hidden="true">
+                  {settings.notice_short || settings.notice_text}
+                </span>
+              </p>
+            )}
             <div className="textsize" role="group" aria-label={t.a11y.textSize}>
               {[
                 ['A−', t.a11y.smaller],
@@ -162,9 +168,11 @@ export default function Header() {
       <header className={`site-header${scrolled ? ' is-scrolled' : ''}${open ? ' is-open' : ''}`}>
         <div className="container site-header__inner">
           <Link to="/" className="brand" onClick={e => onHome && onNav(e, 'home')}>
-            <img src={logo} alt={t.a11y.logoAlt} width="383" height="86" className="brand__logo" />
-            <span className="brand__divider" aria-hidden="true" />
-            <span className="brand__name">{t.brand.name}</span>
+            {settings.logo && (
+              <img src={mediaUrl(settings.logo)} alt={settings.logo_alt} width="383" height="86" className="brand__logo" />
+            )}
+            {settings.logo && <span className="brand__divider" aria-hidden="true" />}
+            <span className="brand__name">{settings.brand_name}</span>
           </Link>
 
           <nav className="nav" aria-label={t.a11y.mainNav}>
@@ -174,16 +182,16 @@ export default function Header() {
                 aria-hidden="true"
                 style={pill ? { transform: `translateX(${pill.x}px)`, width: pill.w } : undefined}
               />
-              {NAV_ITEMS.map(({ id, key }) => (
+              {navItems.map(({ id, section, label }) => (
                 <li key={id}>
                   <a
-                    href={`/#${id}`}
-                    data-nav={id}
-                    className={`nav__link${activeId === id ? ' is-active' : ''}`}
-                    aria-current={activeId === id ? 'true' : undefined}
-                    onClick={e => onNav(e, id)}
+                    href={`/#${section}`}
+                    data-nav={section}
+                    className={`nav__link${activeId === section ? ' is-active' : ''}`}
+                    aria-current={activeId === section ? 'true' : undefined}
+                    onClick={e => onNav(e, section)}
                   >
-                    {t.nav[key]}
+                    {label}
                   </a>
                 </li>
               ))}
@@ -192,10 +200,12 @@ export default function Header() {
 
           <div className="site-header__actions">
             <LanguageSwitch />
-            <a href="/#register" className="btn btn--primary btn--sm site-header__cta" onClick={e => onNav(e, 'register')}>
-              {t.nav.cta}
-              <Icon name="arrowRight" size={15} />
-            </a>
+            {settings.header_cta && (
+              <a href="/#register" className="btn btn--primary btn--sm site-header__cta" onClick={e => onNav(e, 'register')}>
+                {settings.header_cta}
+                <Icon name="arrowRight" size={15} />
+              </a>
+            )}
             <button
               type="button"
               className="icon-btn menu-toggle"
@@ -212,23 +222,27 @@ export default function Header() {
         <div id="mobile-menu" className="mobile-menu" hidden={!open}>
           <nav className="container" aria-label={t.a11y.mainNav}>
             <ul className="mobile-menu__list">
-              {NAV_ITEMS.map(({ id, key }, i) => (
+              {navItems.map(({ id, section, label }, i) => (
                 <li key={id} style={{ '--i': i }}>
-                  <a href={`/#${id}`} className="mobile-menu__link" onClick={e => onNav(e, id)}>
-                    {t.nav[key]}
+                  <a href={`/#${section}`} className="mobile-menu__link" onClick={e => onNav(e, section)}>
+                    {label}
                     <Icon name="arrowRight" size={18} />
                   </a>
                 </li>
               ))}
             </ul>
             <div className="mobile-menu__foot">
-              <a href="/#register" className="btn btn--primary" onClick={e => onNav(e, 'register')}>
-                {t.nav.cta}
-              </a>
-              <a className="mobile-menu__admin" href={`tel:${CONTACT.phone}`}>
-                <Icon name="phone" size={16} />
-                {CONTACT.phoneLabel}
-              </a>
+              {settings.header_cta && (
+                <a href="/#register" className="btn btn--primary" onClick={e => onNav(e, 'register')}>
+                  {settings.header_cta}
+                </a>
+              )}
+              {contact.phone && (
+                <a className="mobile-menu__admin" href={`tel:${contact.phone}`}>
+                  <Icon name="phone" size={16} />
+                  {contact.phone_label || contact.phone}
+                </a>
+              )}
             </div>
           </nav>
         </div>

@@ -2,10 +2,14 @@ import { Link } from 'react-router-dom'
 import Icon from '../components/ui/Icon'
 import Mandala from '../components/ui/Mandala'
 import { useLanguage } from '../i18n/LanguageContext'
-import photo from '../assets/market-produce.jpg'
+import fallbackPhoto from '../assets/market-produce.jpg'
+import { useSection } from '../content/SiteContent'
+import { mediaUrl } from '../services/config'
 
 export default function NotFound() {
   const { t, num } = useLanguage()
+  const hero = useSection('hero')
+  const photo = hero.main_image ? mediaUrl(hero.main_image) : fallbackPhoto
   return (
     <section className="standalone">
       <Mandala className="standalone__mandala" />

@@ -1,21 +1,22 @@
 import { useRef, useState } from 'react'
 import Icon from '../ui/Icon'
-import { CONTACT } from '../../data/site'
 import { useLanguage } from '../../i18n/LanguageContext'
+import { useCollection, useSection } from '../../content/SiteContent'
+import { submitEnquiry } from '../../services/site'
 import './RegistrationCTA.css'
 
-const SUBJECTS = ['stall', 'seller', 'exhibition', 'general', 'technical', 'other']
-
-const INITIAL = { name: '', email: '', phone: '', subject: '', message: '', consent: false }
+const INITIAL = { name: '', email: '', phone: '', subject: '', message: '', consent: false, website: '' }
+const FIELDS = ['name', 'email', 'phone', 'subject', 'message', 'consent']
 
 // Returns the keys of invalid fields; messages come from the active language.
+// The server applies the same rules (backend enquiries.schema.js).
 function validate(form) {
   const e = {}
-  if (!form.name.trim()) e.name = true
-  if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = true
+  if (form.name.trim().length < 2) e.name = true
+  if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = true
   if (form.phone && !/^[6-9]\d{9}$/.test(form.phone.replace(/\s/g, ''))) e.phone = true
   if (!form.subject) e.subject = true
-  if (!form.message.trim() || form.message.trim().length < 20) e.message = true
+  if (form.message.trim().length < 20) e.message = true
   if (!form.consent) e.consent = true
   return e
 }
@@ -47,11 +48,16 @@ function Field({ id, label, required, optional, error, hint, children }) {
 }
 
 export default function RegistrationCTA() {
-  const { t, num } = useLanguage()
-  const r = t.register
+  const { t, num, lang } = useLanguage()
+  const r = useSection('register')
+  const contact = useSection('contact')
+  const subjects = useCollection('enquirySubjects')
+  const ui = t.register
   const [form, setForm] = useState(INITIAL)
   const [errors, setErrors] = useState({})
-  const [submitted, setSubmitted] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [failure, setFailure] = useState('')
+  const [submittedName, setSubmittedName] = useState(null)
   const formRef = useRef(null)
   const doneRef = useRef(null)
 
@@ -60,27 +66,60 @@ export default function RegistrationCTA() {
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
   }
 
-  function submit(ev) {
+  function focusFirst(errs) {
+    const first = FIELDS.find(k => errs[k])
+    formRef.current?.querySelector(`[name="${first}"]`)?.focus()
+  }
+
+  async function submit(ev) {
     ev.preventDefault()
+    if (sending) return
+    setFailure('')
     const errs = validate(form)
     if (Object.keys(errs).length) {
       setErrors(errs)
-      // Move focus to the first invalid field.
-      const first = Object.keys(INITIAL).find(k => errs[k])
-      formRef.current?.querySelector(`[name="${first}"]`)?.focus()
+      focusFirst(errs)
       return
     }
-    setSubmitted(true)
-    requestAnimationFrame(() => doneRef.current?.focus())
+    setSending(true)
+    try {
+      await submitEnquiry({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.replace(/\s/g, ''),
+        subject: form.subject,
+        message: form.message.trim(),
+        consent: form.consent,
+        language: lang,
+        website: form.website,
+      })
+      setSubmittedName(form.name.trim())
+      setForm(INITIAL)
+      setErrors({})
+      requestAnimationFrame(() => doneRef.current?.focus())
+    } catch (err) {
+      // Field-level problems from the server are shown against the fields.
+      const serverErrs = {}
+      for (const d of err.details || []) if (FIELDS.includes(d.field)) serverErrs[d.field] = true
+      if (Object.keys(serverErrs).length) {
+        setErrors(serverErrs)
+        focusFirst(serverErrs)
+      } else {
+        setFailure(err.status === 0 ? ui.networkError : err.status === 429 ? ui.rateLimited : ui.submitError)
+      }
+    } finally {
+      setSending(false)
+    }
   }
 
   function reset() {
     setForm(INITIAL)
     setErrors({})
-    setSubmitted(false)
+    setFailure('')
+    setSubmittedName(null)
   }
 
-  const err = key => (errors[key] ? r.errors[key] : null)
+  const err = key => (errors[key] ? ui.errors[key] : null)
 
   // Shared props for each control: name, validity and error link.
   const control = key => ({
@@ -95,87 +134,83 @@ export default function RegistrationCTA() {
       <div className="container">
         <header className="section__head section__head--split" data-reveal>
           <div>
-            <p className="eyebrow">
-              <span className="eyebrow__dot" aria-hidden="true" />
-              {r.badge}
-            </p>
+            {r.badge && (
+              <p className="eyebrow">
+                <span className="eyebrow__dot" aria-hidden="true" />
+                {r.badge}
+              </p>
+            )}
             <h2 id="register-title" className="section__title">
               {r.title}
             </h2>
           </div>
-          <p className="section__lead">{r.lead}</p>
+          {r.lead && <p className="section__lead">{r.lead}</p>}
         </header>
 
         <div className="register__grid">
           <div className="register__panel" data-reveal style={{ '--d': 1 }}>
-            {submitted ? (
+            {submittedName !== null ? (
               <div className="register__done" ref={doneRef} tabIndex={-1} role="status">
                 <span className="register__done-icon">
                   <Icon name="checkCircle" size={28} />
                 </span>
-                <h3>{r.thanks.replace('{name}', form.name)}</h3>
-                <p>{r.recorded}</p>
-                <p className="register__notice">
-                  <Icon name="info" size={16} />
-                  <span>
-                    <strong>{r.noticeTitle}</strong> {r.notice}{' '}
-                    <a href={`tel:${CONTACT.phone}`}>{CONTACT.phoneLabel}</a> {r.or}{' '}
-                    <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>.
-                  </span>
-                </p>
+                <h3>{(r.thanks || '').replace('{name}', submittedName)}</h3>
+                {r.recorded && <p>{r.recorded}</p>}
                 <button type="button" className="btn btn--ghost" onClick={reset}>
                   {r.again}
                 </button>
               </div>
             ) : (
-              <form className="register__form" ref={formRef} onSubmit={submit} noValidate>
+              <form className="register__form" ref={formRef} onSubmit={submit} noValidate aria-busy={sending}>
+                {/* Honeypot: hidden from people, filled in by spam bots. */}
+                <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
+                  <label htmlFor="reg-website">Website</label>
+                  <input id="reg-website" name="website" tabIndex={-1} autoComplete="off" value={form.website} onChange={e => set('website', e.target.value)} />
+                </div>
                 <div className="register__fields">
-                  <Field id="reg-name" label={r.fields.name} required error={err('name')}>
+                  <Field id="reg-name" label={r.label_name} required error={err('name')}>
                     <input
                       {...control('name')}
                       className="input"
                       type="text"
                       autoComplete="name"
-                      placeholder={r.placeholders.name}
+                      maxLength={100}
+                      placeholder={r.placeholder_name}
                       value={form.name}
                       onChange={e => set('name', e.target.value)}
                     />
                   </Field>
-                  <Field id="reg-email" label={r.fields.email} required error={err('email')}>
+                  <Field id="reg-email" label={r.label_email} required error={err('email')}>
                     <input
                       {...control('email')}
                       className="input"
                       type="email"
                       autoComplete="email"
-                      placeholder={r.placeholders.email}
+                      maxLength={160}
+                      placeholder={r.placeholder_email}
                       value={form.email}
                       onChange={e => set('email', e.target.value)}
                     />
                   </Field>
-                  <Field id="reg-phone" label={r.fields.phone} optional={r.optional} error={err('phone')}>
+                  <Field id="reg-phone" label={r.label_phone} optional={ui.optional} error={err('phone')}>
                     <input
                       {...control('phone')}
                       className="input"
                       type="tel"
                       inputMode="numeric"
                       autoComplete="tel-national"
-                      placeholder={r.placeholders.phone}
+                      placeholder={r.placeholder_phone}
                       maxLength={10}
                       value={form.phone}
                       onChange={e => set('phone', e.target.value.replace(/\D/g, ''))}
                     />
                   </Field>
-                  <Field id="reg-subject" label={r.fields.subject} required error={err('subject')}>
-                    <select
-                      {...control('subject')}
-                      className="input"
-                      value={form.subject}
-                      onChange={e => set('subject', e.target.value)}
-                    >
-                      <option value="">{r.selectSubject}</option>
-                      {SUBJECTS.map(s => (
-                        <option key={s} value={s}>
-                          {r.subjects[s]}
+                  <Field id="reg-subject" label={r.label_subject} required error={err('subject')}>
+                    <select {...control('subject')} className="input" value={form.subject} onChange={e => set('subject', e.target.value)}>
+                      <option value="">{r.select_subject}</option>
+                      {subjects.map(s => (
+                        <option key={s.id} value={s.code}>
+                          {s.label}
                         </option>
                       ))}
                     </select>
@@ -183,16 +218,17 @@ export default function RegistrationCTA() {
                   <div className="register__wide">
                     <Field
                       id="reg-message"
-                      label={r.fields.message}
+                      label={r.label_message}
                       required
                       error={err('message')}
-                      hint={`${r.hint} · ${num(form.message.trim().length)}/${r.hintMin}`}
+                      hint={`${r.hint ? `${r.hint} · ` : ''}${num(form.message.trim().length)}/${ui.hintMin}`}
                     >
                       <textarea
                         {...control('message')}
                         className="input"
                         rows={4}
-                        placeholder={r.placeholders.message}
+                        maxLength={2000}
+                        placeholder={r.placeholder_message}
                         value={form.message}
                         onChange={e => set('message', e.target.value)}
                       />
@@ -200,24 +236,25 @@ export default function RegistrationCTA() {
                   </div>
                   <div className="register__wide">
                     <label className="check">
-                      <input
-                        {...control('consent')}
-                        type="checkbox"
-                        checked={form.consent}
-                        onChange={e => set('consent', e.target.checked)}
-                      />
+                      <input {...control('consent')} type="checkbox" checked={form.consent} onChange={e => set('consent', e.target.checked)} />
                       <span>{r.consent}</span>
                     </label>
                     {errors.consent ? (
                       <p className="field__error" id="reg-consent-error">
                         <Icon name="alert" size={14} />
-                        {r.errors.consent}
+                        {ui.errors.consent}
                       </p>
                     ) : null}
                   </div>
                 </div>
-                <button type="submit" className="btn btn--primary btn--lg register__submit">
-                  {r.submit}
+                {failure && (
+                  <p className="register__notice register__notice--error" role="alert">
+                    <Icon name="alert" size={16} />
+                    <span>{failure}</span>
+                  </p>
+                )}
+                <button type="submit" className="btn btn--primary btn--lg register__submit" disabled={sending}>
+                  {sending ? ui.sending : r.submit}
                   <Icon name="send" size={18} />
                 </button>
               </form>
@@ -228,31 +265,41 @@ export default function RegistrationCTA() {
             <span className="register__contact-icon">
               <Icon name="phone" size={22} />
             </span>
-            <h3 id="contact-title">{r.contactTitle}</h3>
-            <p className="register__contact-desc">{r.contactDesc}</p>
-            <a className="register__phone" href={`tel:${CONTACT.phone}`}>
-              {CONTACT.phoneLabel}
-            </a>
+            <h3 id="contact-title">{r.contact_title}</h3>
+            {r.contact_desc && <p className="register__contact-desc">{r.contact_desc}</p>}
+            {contact.phone && (
+              <a className="register__phone" href={`tel:${contact.phone}`}>
+                {contact.phone_label || contact.phone}
+              </a>
+            )}
             <ul className="register__list">
-              <li>
-                <Icon name="mail" size={16} />
-                <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
-              </li>
-              <li>
-                <Icon name="mapPin" size={16} />
-                <span>{CONTACT.address}</span>
-              </li>
-              <li>
-                <Icon name="clock" size={16} />
-                <span>{r.hours}</span>
-              </li>
-              <li>
-                <Icon name="globe" size={16} />
-                <a href={CONTACT.website} target="_blank" rel="noopener noreferrer">
-                  mahaamrut.org.in
-                  <span className="sr-only"> {t.a11y.newTab}</span>
-                </a>
-              </li>
+              {contact.email && (
+                <li>
+                  <Icon name="mail" size={16} />
+                  <a href={`mailto:${contact.email}`}>{contact.email}</a>
+                </li>
+              )}
+              {contact.address && (
+                <li>
+                  <Icon name="mapPin" size={16} />
+                  <span>{contact.address}</span>
+                </li>
+              )}
+              {contact.hours && (
+                <li>
+                  <Icon name="clock" size={16} />
+                  <span>{contact.hours}</span>
+                </li>
+              )}
+              {contact.website && (
+                <li>
+                  <Icon name="globe" size={16} />
+                  <a href={contact.website} target="_blank" rel="noopener noreferrer">
+                    {contact.website_label || contact.website}
+                    <span className="sr-only"> {t.a11y.newTab}</span>
+                  </a>
+                </li>
+              )}
             </ul>
           </aside>
         </div>

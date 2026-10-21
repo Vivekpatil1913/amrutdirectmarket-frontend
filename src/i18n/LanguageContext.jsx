@@ -38,9 +38,9 @@ export function LanguageProvider({ children }) {
     [lang]
   )
 
+  // The page title and meta tags come from the CMS (see SiteHead).
   useEffect(() => {
     document.documentElement.lang = lang
-    document.title = translations[lang].meta.title
   }, [lang])
 
   const value = useMemo(() => {

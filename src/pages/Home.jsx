@@ -6,11 +6,14 @@ import RegistrationCTA from '../components/sections/RegistrationCTA'
 import { useSectionNav } from '../components/layout/Header'
 import { useReveal } from '../hooks/useReveal'
 import { useLanguage } from '../i18n/LanguageContext'
+import { useSite } from '../content/SiteContent'
 
 export default function Home() {
   const goTo = useSectionNav()
   const { lang } = useLanguage()
-  useReveal([lang])
+  const { data } = useSite()
+  // Re-scan when content (re)loads so newly rendered items animate in too.
+  useReveal([lang, data])
 
   return (
     <>
