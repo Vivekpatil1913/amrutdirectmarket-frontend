@@ -1,0 +1,397 @@
+/* ==========================================================================
+   Cinematic motion layer. Self-contained: removing the import of this file
+   in main.jsx restores the previous motion exactly. Selectors are scoped
+   under `.app` so they win over the section stylesheets that load later.
+   ========================================================================== */
+
+/* ---------- Hero: letterbox curtain opening ---------- */
+.app .hero::before,
+.app .hero::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  height: 50%;
+  background: var(--night);
+  pointer-events: none;
+  animation: curtain-open 1.3s cubic-bezier(0.77, 0, 0.18, 1) 0.15s both;
+}
+.app .hero::before {
+  top: 0;
+  box-shadow: inset 0 -2px 0 var(--brand);
+  --curtain-to: -101%;
+}
+.app .hero::after {
+  bottom: 0;
+  box-shadow: inset 0 2px 0 var(--brand);
+  --curtain-to: 101%;
+}
+
+/* Hero content arrives as the curtain parts, pulling into focus. */
+.app .hero__in {
+  animation: focus-rise 1.2s var(--ease) both;
+  animation-delay: calc(var(--d, 0) * 110ms + 700ms);
+}
+.app .hero__title {
+  animation-name: focus-title;
+  animation-duration: 1.6s;
+}
+.app .hero__photo--main {
+  animation: photo-in 1.5s var(--ease) both 0.75s;
+}
+.app .hero__photo--small {
+  animation: photo-in 1.4s var(--ease) both 1.1s;
+}
+.app .hero__chip {
+  animation: rise-in 0.9s var(--ease) both 1.6s, float 4.5s ease-in-out infinite 2.5s;
+}
+/* Slow Ken Burns drift once the photo has settled. */
+.app .hero__photo--main img {
+  animation: photo-settle 2.2s var(--ease) both 0.75s, ken-burns 22s ease-in-out 3s infinite alternate;
+}
+/* A single light sweep across the main photo. */
+.app .hero__photo--main::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 35%, hsl(40 100% 92% / 0.45) 50%, transparent 65%);
+  translate: -120% 0;
+  pointer-events: none;
+  animation: light-sweep 1.6s ease-in-out 2.1s both;
+}
+
+/* ---------- Scroll reveals: deeper travel with a focus pull ---------- */
+.app [data-reveal] {
+  transform: translateY(44px);
+  filter: blur(10px);
+  transition: opacity 1.1s var(--ease), transform 1.1s var(--ease), filter 1.1s var(--ease);
+  transition-delay: calc(var(--d, 0) * 110ms);
+}
+.app [data-reveal][data-visible] {
+  transform: none;
+  filter: none;
+}
+/* Highlight cards tip forward out of depth. */
+.app .hl-grid > [data-reveal] {
+  transform: perspective(900px) translateY(50px) rotateX(22deg);
+  transform-origin: 50% 100%;
+}
+.app .hl-grid > [data-reveal][data-visible] {
+  transform: none;
+}
+
+/* Section titles wipe on like a title card. */
+.app [data-visible] .section__title {
+  animation: title-wipe 1.3s cubic-bezier(0.77, 0, 0.18, 1) 0.2s both;
+}
+
+/* About photo rises from behind a curtain and settles out of a zoom. */
+.app [data-visible] .about__frame {
+  animation: frame-reveal 1.5s cubic-bezier(0.77, 0, 0.18, 1) 0.1s both;
+}
+.app [data-visible] .about__frame img {
+  animation: zoom-settle 2.2s var(--ease) 0.1s backwards;
+}
+
+/* ---------- Film grain ---------- */
+.app::after {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  z-index: 199;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 0.9s steps(6) infinite;
+}
+
+/* ---------- Header: drops in on load ---------- */
+.app .govbar {
+  animation: fade-in 0.8s ease 0.1s backwards;
+}
+.app .site-header {
+  animation: drop-in 1s var(--ease) 0.2s backwards;
+}
+.app .nav__list > li:not(.nav__pill) {
+  animation: focus-rise 0.8s var(--ease) backwards;
+}
+.app .nav__list > li:nth-child(2) { animation-delay: 0.4s; }
+.app .nav__list > li:nth-child(3) { animation-delay: 0.48s; }
+.app .nav__list > li:nth-child(4) { animation-delay: 0.56s; }
+.app .nav__list > li:nth-child(5) { animation-delay: 0.64s; }
+.app .nav__list > li:nth-child(6) { animation-delay: 0.72s; }
+.app .nav__list > li:nth-child(n + 7) { animation-delay: 0.8s; }
+
+/* ---------- Hero atmosphere ---------- */
+/* Floating bokeh lights drifting through the backdrop. */
+.app .hero__backdrop::before,
+.app .hero__backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  animation: bokeh-drift 18s ease-in-out infinite alternate, fade-in 2s ease 1.4s backwards;
+}
+.app .hero__backdrop::before {
+  background-image: radial-gradient(circle at 12% 30%, hsl(30 95% 70% / 0.35) 0 6px, transparent 7px),
+    radial-gradient(circle at 34% 78%, hsl(22 90% 60% / 0.25) 0 10px, transparent 11px),
+    radial-gradient(circle at 58% 18%, hsl(38 95% 70% / 0.3) 0 4px, transparent 5px),
+    radial-gradient(circle at 82% 62%, hsl(22 90% 60% / 0.22) 0 14px, transparent 15px),
+    radial-gradient(circle at 92% 12%, hsl(30 95% 70% / 0.3) 0 5px, transparent 6px);
+}
+.app .hero__backdrop::after {
+  background-image: radial-gradient(circle at 22% 58%, hsl(38 95% 70% / 0.28) 0 3px, transparent 4px),
+    radial-gradient(circle at 46% 40%, hsl(22 90% 60% / 0.18) 0 18px, transparent 19px),
+    radial-gradient(circle at 70% 88%, hsl(30 95% 70% / 0.3) 0 5px, transparent 6px),
+    radial-gradient(circle at 6% 86%, hsl(22 90% 60% / 0.2) 0 8px, transparent 9px);
+  animation-duration: 24s, 2s;
+  animation-direction: alternate-reverse, normal;
+}
+/* The whole mandala turns very slowly behind the hero. */
+.app .hero__mandala {
+  animation: spin-rotate 160s linear infinite;
+}
+/* Fact strip: each fact flips up in turn. */
+.app .hero__fact {
+  animation: flip-up 0.9s var(--ease) backwards;
+}
+.app .hero__fact:nth-child(1) { animation-delay: 1.35s; }
+.app .hero__fact:nth-child(2) { animation-delay: 1.47s; }
+.app .hero__fact:nth-child(3) { animation-delay: 1.59s; }
+.app .hero__fact:nth-child(n + 4) { animation-delay: 1.71s; }
+/* Quick links: the strip lands, then each link follows. */
+.app .quick__item {
+  animation: focus-rise 0.9s var(--ease) backwards;
+}
+.app .quick__item:nth-child(1) { animation-delay: 1.5s; }
+.app .quick__item:nth-child(2) { animation-delay: 1.62s; }
+.app .quick__item:nth-child(3) { animation-delay: 1.74s; }
+.app .quick__item:nth-child(n + 4) { animation-delay: 1.86s; }
+/* Periodic glow pulse on the hero's main call to action. */
+.app .hero__actions .btn--primary {
+  animation: cta-glow 3.2s ease-in-out 3s infinite;
+}
+
+/* ---------- Scroll-linked: hero recedes as you scroll past ---------- */
+@supports (animation-timeline: view()) {
+  .app .hero__copy,
+  .app .hero__visual {
+    animation: recede linear both;
+    animation-timeline: view();
+    animation-range: exit 10% exit 100%;
+  }
+  .app .footer__quote,
+  .app .footer__grid > * {
+    animation: focus-rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 80%;
+  }
+}
+
+/* ---------- Highlights: a light glint crosses each card ---------- */
+.app .hl-card {
+  overflow: hidden;
+}
+.app .hl-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 35%, hsl(30 90% 80% / 0.35) 50%, transparent 65%);
+  translate: -130% 0;
+  pointer-events: none;
+}
+.app [data-visible] .hl-card::after {
+  animation: light-sweep 1.4s ease-in-out both;
+  animation-delay: calc(var(--d, 0) * 150ms + 700ms);
+}
+.app .hl-card:hover::after {
+  animation: light-sweep 0.9s ease-in-out both;
+}
+
+/* ---------- Participation: steps ignite down the timeline ---------- */
+.app [data-visible] .steps__node {
+  animation: ignite 0.9s var(--ease) both;
+  animation-delay: calc(var(--i) * 220ms + 350ms);
+}
+.app [data-visible] .steps__item > div {
+  animation: slide-focus 0.9s var(--ease) both;
+  animation-delay: calc(var(--i) * 220ms + 450ms);
+}
+.app [data-visible] .participate__who li {
+  animation: flip-up 0.7s var(--ease) backwards;
+}
+.app [data-visible] .participate__who li:nth-child(2) { animation-delay: 0.1s; }
+.app [data-visible] .participate__who li:nth-child(3) { animation-delay: 0.2s; }
+.app [data-visible] .participate__who li:nth-child(4) { animation-delay: 0.3s; }
+.app [data-visible] .participate__who li:nth-child(n + 5) { animation-delay: 0.4s; }
+
+/* ---------- Registration: form fields cascade in ---------- */
+.app [data-visible] .register__fields > * {
+  animation: focus-rise 0.8s var(--ease) backwards;
+}
+.app [data-visible] .register__fields > :nth-child(1) { animation-delay: 0.3s; }
+.app [data-visible] .register__fields > :nth-child(2) { animation-delay: 0.38s; }
+.app [data-visible] .register__fields > :nth-child(3) { animation-delay: 0.46s; }
+.app [data-visible] .register__fields > :nth-child(4) { animation-delay: 0.54s; }
+.app [data-visible] .register__fields > :nth-child(5) { animation-delay: 0.62s; }
+.app [data-visible] .register__fields > :nth-child(6) { animation-delay: 0.7s; }
+.app [data-visible] .register__fields > :nth-child(n + 7) { animation-delay: 0.78s; }
+/* The contact card's dashed orb slowly turns and breathes. */
+.app .register__contact::before {
+  animation: breathe 6s ease-in-out infinite, spin-rotate 50s linear infinite;
+}
+
+/* ---------- Keyframes ---------- */
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}
+@keyframes bokeh-drift {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 3% -6%;
+  }
+}
+@keyframes flip-up {
+  from {
+    opacity: 0;
+    transform: perspective(600px) rotateX(-70deg);
+    transform-origin: 50% 100%;
+  }
+}
+@keyframes cta-glow {
+  0%,
+  70%,
+  100% {
+    box-shadow: 0 8px 20px -12px hsl(22 70% 38% / 0.75), 0 0 0 0 hsl(22 72% 52% / 0.45);
+  }
+  85% {
+    box-shadow: 0 8px 20px -12px hsl(22 70% 38% / 0.75), 0 0 0 12px hsl(22 72% 52% / 0);
+  }
+}
+@keyframes recede {
+  to {
+    opacity: 0.2;
+    filter: blur(6px);
+    scale: 0.94;
+  }
+}
+@keyframes ignite {
+  0% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  60% {
+    opacity: 1;
+    scale: 1.15;
+    box-shadow: 0 0 0 10px hsl(22 72% 52% / 0.25);
+  }
+  100% {
+    scale: 1;
+    box-shadow: 0 0 0 0 hsl(22 72% 52% / 0);
+  }
+}
+@keyframes slide-focus {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+    filter: blur(6px);
+  }
+}
+@keyframes curtain-open {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(var(--curtain-to));
+  }
+}
+@keyframes focus-rise {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+    filter: blur(8px);
+  }
+}
+@keyframes focus-title {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+    filter: blur(14px);
+    letter-spacing: 0.06em;
+  }
+}
+@keyframes ken-burns {
+  from {
+    scale: 1;
+    translate: 0 0;
+  }
+  to {
+    scale: 1.09;
+    translate: -2% -1.5%;
+  }
+}
+@keyframes light-sweep {
+  from {
+    translate: -120% 0;
+  }
+  to {
+    translate: 120% 0;
+  }
+}
+@keyframes title-wipe {
+  from {
+    clip-path: inset(-15% 100% -15% 0);
+  }
+  to {
+    clip-path: inset(-15% -2% -15% 0);
+  }
+}
+@keyframes frame-reveal {
+  from {
+    clip-path: inset(100% 0 0 0 round var(--radius-lg));
+  }
+  to {
+    clip-path: inset(0 0 0 0 round var(--radius-lg));
+  }
+}
+@keyframes zoom-settle {
+  from {
+    scale: 1.3;
+  }
+}
+@keyframes grain {
+  0% { translate: 0 0; }
+  20% { translate: -4% 3%; }
+  40% { translate: 3% -5%; }
+  60% { translate: -6% -2%; }
+  80% { translate: 5% 4%; }
+  100% { translate: -2% 6%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app .hero::before,
+  .app .hero::after,
+  .app::after,
+  .app .hero__backdrop::before,
+  .app .hero__backdrop::after {
+    display: none;
+  }
+  .app .hero__copy,
+  .app .hero__visual,
+  .app .footer__quote,
+  .app .footer__grid > * {
+    animation: none;
+  }
+  .app [data-reveal],
+  .app .hl-grid > [data-reveal] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}

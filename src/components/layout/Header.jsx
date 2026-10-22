@@ -143,6 +143,7 @@ export default function Header() {
                 </span>
               </p>
             )}
+            {/* Text-size controls hidden for now.
             <div className="textsize" role="group" aria-label={t.a11y.textSize}>
               {[
                 ['A−', t.a11y.smaller],
@@ -161,6 +162,7 @@ export default function Header() {
                 </button>
               ))}
             </div>
+            */}
           </div>
         </div>
       </div>
