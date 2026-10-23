@@ -107,9 +107,6 @@
 }
 
 /* ---------- Header: drops in on load ---------- */
-.app .govbar {
-  animation: fade-in 0.8s ease 0.1s backwards;
-}
 .app .site-header {
   animation: drop-in 1s var(--ease) 0.2s backwards;
 }
