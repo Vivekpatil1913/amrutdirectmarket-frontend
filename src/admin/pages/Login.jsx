@@ -47,7 +47,7 @@ export default function AdminLogin() {
           <div className="a-login-logo">
             <Store size={24} />
           </div>
-          <h1 className="a-login-heading">AMRUT Peth CMS</h1>
+          <h1 className="a-login-heading">AMRUT Peth Direct Market CMS</h1>
           <p className="a-login-sub">Sign in to manage the Direct Market website</p>
         </div>
 

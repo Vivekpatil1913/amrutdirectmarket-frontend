@@ -43,7 +43,7 @@ export const COLLECTION_UI = {
   },
   highlights: {
     title: 'Highlight Cards',
-    desc: 'The “Why AMRUT Peth” benefit cards.',
+    desc: 'The “Why AMRUT Peth Direct Market” benefit cards.',
     columns: [
       { key: 'title', label: 'Title', kind: 'bi', sortable: 'title_en' },
       { key: 'desc', label: 'Description', kind: 'bi' },

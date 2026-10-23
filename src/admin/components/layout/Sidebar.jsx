@@ -28,7 +28,7 @@ export function Sidebar({ collapsed, mobileOpen, onMobileClose }) {
           </div>
           {!collapsed && (
             <div>
-              <div className="a-sidebar-title">AMRUT Peth</div>
+              <div className="a-sidebar-title">AMRUT Peth Direct Market</div>
               <div className="a-sidebar-subtitle">CMS Admin</div>
             </div>
           )}

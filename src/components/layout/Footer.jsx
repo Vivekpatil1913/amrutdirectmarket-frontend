@@ -33,7 +33,10 @@ export default function Footer() {
             <img src={mediaUrl(settings.logo)} alt={settings.logo_alt} width="383" height="86" className="footer__logo" loading="lazy" />
           )}
           <p className="footer__title">
-            {settings.brand_name} <span className="footer__title-mr">{settings.brand_sub}</span>
+            {settings.brand_name}{' '}
+            {settings.brand_sub && !settings.brand_name?.includes(settings.brand_sub) && (
+              <span className="footer__title-mr">{settings.brand_sub}</span>
+            )}
           </p>
           {f.about && <p className="footer__about">{f.about}</p>}
           {settings.gov_state && <p className="footer__gov">{settings.gov_state}</p>}
