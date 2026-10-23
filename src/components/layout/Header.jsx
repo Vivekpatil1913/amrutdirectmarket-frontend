@@ -126,45 +126,6 @@ export default function Header() {
       <a className="skip-link" href="#main-content">
         {t.a11y.skip}
       </a>
-      <div className="govbar">
-        <div className="container govbar__inner">
-          <p className="govbar__id">
-            <span className="govbar__state">{settings.gov_state}</span>
-            {settings.gov_org && <span className="govbar__sep" aria-hidden="true" />}
-            <span className="govbar__org">{settings.gov_org}</span>
-          </p>
-          <div className="govbar__tools">
-            {settings.notice_enabled && settings.notice_text && (
-              <p className="govbar__preview" title={settings.notice_text}>
-                <Icon name="info" size={14} />
-                <span className="govbar__preview-long">{settings.notice_text}</span>
-                <span className="govbar__preview-short" aria-hidden="true">
-                  {settings.notice_short || settings.notice_text}
-                </span>
-              </p>
-            )}
-            <div className="textsize" role="group" aria-label={t.a11y.textSize}>
-              {[
-                ['A−', t.a11y.smaller],
-                ['A', t.a11y.reset],
-                ['A+', t.a11y.larger],
-              ].map(([label, aria], i) => (
-                <button
-                  key={label}
-                  type="button"
-                  className="textsize__btn"
-                  aria-label={aria}
-                  aria-pressed={scale === i}
-                  onClick={() => setScale(i)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
       <header className={`site-header${scrolled ? ' is-scrolled' : ''}${open ? ' is-open' : ''}`}>
         <div className="container site-header__inner">
           <Link to="/" className="brand" onClick={e => onHome && onNav(e, 'home')}>

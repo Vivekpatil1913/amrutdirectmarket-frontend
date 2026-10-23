@@ -583,6 +583,191 @@ select.input {
   }
 }
 
+/* Ambient & hover accents. Individual `translate` / `rotate` / `scale`
+   properties are used so they compose with the parallax `transform`. */
+.btn--primary {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.btn--primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 30%, hsl(0 0% 100% / 0.28) 50%, transparent 70%);
+  translate: -110% 0;
+  transition: translate 0.7s var(--ease);
+}
+.btn--primary:hover::after {
+  translate: 110% 0;
+}
+.btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 26px -12px hsl(22 70% 38% / 0.8);
+}
+.eyebrow__dot::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  animation: pulse-ring 2.4s ease-out infinite;
+}
+.mandala__ring--2 {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spin 60s linear infinite;
+}
+.app .hero__ring {
+  animation: spin-rotate 30s linear infinite;
+}
+.app .hero__chip {
+  animation: rise-in 0.9s var(--ease) both 0.9s, float 4.5s ease-in-out infinite 1.8s;
+}
+.app .hl-card__icon,
+.app .quick__icon,
+.app .steps__node {
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s, scale 0.45s var(--ease), rotate 0.45s var(--ease);
+}
+.hl-card:hover .hl-card__icon,
+.quick__item:hover .quick__icon {
+  scale: 1.12;
+  rotate: -8deg;
+}
+.steps__item:hover .steps__node {
+  scale: 1.12;
+}
+.about__frame img {
+  transition: scale 1.2s var(--ease);
+}
+.about__frame:hover img {
+  scale: 1.05;
+}
+.app .hero__glow {
+  animation: breathe 7s ease-in-out infinite;
+}
+.app .hl-card__step {
+  transition: color 0.4s, -webkit-text-stroke-color 0.4s, translate 0.45s var(--ease);
+}
+.hl-card:hover .hl-card__step {
+  color: var(--brand-soft);
+  -webkit-text-stroke-color: var(--brand);
+  translate: 0 -3px;
+}
+.app .about__tags li {
+  transition: background-color 0.25s, border-color 0.25s, color 0.25s, translate 0.3s var(--ease);
+}
+.about__tags li:hover {
+  translate: 0 -3px;
+  border-color: var(--brand);
+  color: var(--brand-ink);
+}
+.app .footer__col a {
+  transition: color 0.2s, translate 0.3s var(--ease);
+}
+.app .footer__col a:hover {
+  translate: 4px 0;
+}
+.footer__top:hover svg {
+  animation: nudge-up 0.9s ease-in-out infinite;
+}
+.register__contact:hover .register__contact-icon {
+  animation: ring 0.9s ease-in-out;
+}
+.app .brand__logo {
+  transition: scale 0.4s var(--ease);
+}
+.brand:hover .brand__logo {
+  scale: 1.05;
+}
+/* Reading-progress bar; only in browsers with scroll-driven animations. */
+@supports (animation-timeline: scroll()) {
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 200;
+    height: 3px;
+    background: linear-gradient(90deg, var(--brand), var(--brand-bright));
+    transform-origin: left;
+    pointer-events: none;
+    animation: progress linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes breathe {
+  0%,
+  100% {
+    scale: 1;
+    opacity: 1;
+  }
+  50% {
+    scale: 1.12;
+    opacity: 0.7;
+  }
+}
+@keyframes nudge-up {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -3px;
+  }
+}
+@keyframes ring {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+  20%,
+  60% {
+    rotate: -14deg;
+  }
+  40%,
+  80% {
+    rotate: 14deg;
+  }
+}
+@keyframes pulse-ring {
+  from {
+    opacity: 0.6;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 1.9;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes spin-rotate {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -8px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

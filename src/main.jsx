@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './styles/global.css'
+import './styles/cinematic.css'
 import { LanguageProvider } from './i18n/LanguageContext'
 import App from './App'
 
